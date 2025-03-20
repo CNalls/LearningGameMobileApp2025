@@ -8,6 +8,34 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/scoreTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="66dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="73dp"
+        android:layout_marginBottom="6dp"
+        android:text="Score: 0"
+        app:layout_constraintBottom_toTopOf="@+id/dynamic_def_list"
+        app:layout_constraintEnd_toStartOf="@+id/word"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/streakTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="54dp"
+        android:layout_marginBottom="6dp"
+        android:text="Streak: 0"
+        app:layout_constraintBottom_toTopOf="@+id/dynamic_def_list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/word"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
         android:id="@+id/word"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

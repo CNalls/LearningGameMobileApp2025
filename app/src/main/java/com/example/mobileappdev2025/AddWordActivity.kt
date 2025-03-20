@@ -4,32 +4,32 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowCompat
 
 class AddWordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // Correct way to enable edge-to-edge in AppCompatActivity
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContentView(R.layout.activity_add_word)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
     }
 
-    fun addWord(view : View){
+    fun addWord(view: View) {
         val word = findViewById<EditText>(R.id.word_edit_text).text.toString()
         val def = findViewById<EditText>(R.id.def_edit_text).text.toString()
 
-        // error checking
+        if (word.isBlank() || def.isBlank()) {
+            // Error handling (optional)
+            return
+        }
 
-        val myIntent = Intent()
-        myIntent.putExtra("word", word)
-        myIntent.putExtra("def", def)
+        val myIntent = Intent().apply {
+            putExtra("word", word)
+            putExtra("def", def)
+        }
         setResult(RESULT_OK, myIntent)
         finish()
     }

@@ -40,27 +40,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="14dp"
-        android:text="TextView"
+        android:text="Word"
+        android:textSize="24sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ListView
         android:id="@+id/dynamic_def_list"
-        android:layout_width="409dp"
-        android:layout_height="640dp"
-        android:layout_marginTop="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/stats_button"
+        android:layout_width="0dp"
+        android:layout_height="400dp"
+        app:layout_constraintTop_toBottomOf="@+id/word"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/word" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/stats_button" />
 
     <Button
         android:id="@+id/stats_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Stats"
         android:layout_marginStart="36dp"
-        android:onClick="openStats"
-        android:text="@string/stats"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -68,9 +69,8 @@
         android:id="@+id/add_word_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="36dp"
-        android:onClick="openAddWord"
         android:text="Add Word"
+        android:layout_marginEnd="36dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

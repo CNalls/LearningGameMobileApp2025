@@ -1,34 +1,30 @@
 package com.example.mobileappdev2025
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 class StatsActivity : AppCompatActivity() {
+
+    private lateinit var prefs: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_stats)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
-        val score = intent.getStringExtra("score")?:"SCORE NOT FOUND";
-        val streak = intent.getStringExtra("streak")?:"STREAK NOT FOUND";
-        val totalCorrect = intent.getStringExtra("totalCorrect")?:"TOTAL CORRECT NOT FOUND";
-        val totalWrong = intent.getStringExtra("totalWrong")?:"TOTAL WRONG NOT FOUND";
-        val longestStreak = intent.getStringExtra("longestStreak")?:"LONGEST STREAK NOT FOUND";
+        prefs = getSharedPreferences("game_data", MODE_PRIVATE)
 
-        findViewById<TextView>(R.id.score_text).text = "Score : " + score;
-        findViewById<TextView>(R.id.streak_text).text = "Streak : " + streak;
-        findViewById<TextView>(R.id.correct_text).text = "Correct Count : " + totalCorrect;
-        findViewById<TextView>(R.id.wrong_text).text = "Incorrect Count : " + totalWrong;
-        findViewById<TextView>(R.id.longest_streak_text).text = "Longest Streak : " + longestStreak
-        // finish(); // used the pop the activity stack
+        // Load saved stats from SharedPreferences
+        val score = prefs.getInt("score", 0)
+        val totalCorrect = prefs.getInt("totalCorrect", 0)
+        val totalWrong = prefs.getInt("totalWrong", 0)
+        val streak = prefs.getInt("streak", 0)
+
+        // Update UI with loaded values
+        findViewById<TextView>(R.id.score_text).text = "Score: $score"
+        findViewById<TextView>(R.id.correct_text).text = "Total Correct: $totalCorrect"
+        findViewById<TextView>(R.id.wrong_text).text = "Total Wrong: $totalWrong"
+        findViewById<TextView>(R.id.streak_text).text = "Current Streak: $streak"
     }
 }

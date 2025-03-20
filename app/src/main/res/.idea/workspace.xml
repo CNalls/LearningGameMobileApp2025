@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="49f5ac78-8336-4e86-9c56-453ddc9ddf19" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../../../build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/example/mobileappdev2025/AddWordActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/example/mobileappdev2025/AddWordActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/example/mobileappdev2025/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/example/mobileappdev2025/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../java/com/example/mobileappdev2025/StatsActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../java/com/example/mobileappdev2025/StatsActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/values/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/values/themes.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../../../gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;majahholliday&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/CNalls/LearningGameMobileApp2025.git&quot;,
+    &quot;accountId&quot;: &quot;73939d36-c307-47ac-8109-38ebe4c6264a&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2uZ27kYfhketeSj1iPJdMEbWNwO" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/majahholliday/LearningGameMobileApp2025/app/src/main/res"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="49f5ac78-8336-4e86-9c56-453ddc9ddf19" name="Changes" comment="" />
+      <created>1742441612144</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1742441612144</updated>
+    </task>
+    <servers />
+  </component>
+</project>

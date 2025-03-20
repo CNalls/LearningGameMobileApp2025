@@ -1,0 +1,1358 @@
+Index: ../java/com/example/mobileappdev2025/AddWordActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mobileappdev2025\n\nimport android.content.Intent\nimport android.os.Bundle\nimport android.view.View\nimport android.widget.EditText\nimport androidx.activity.enableEdgeToEdge\nimport androidx.appcompat.app.AppCompatActivity\nimport androidx.core.view.ViewCompat\nimport androidx.core.view.WindowInsetsCompat\n\nclass AddWordActivity : AppCompatActivity() {\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        enableEdgeToEdge()\n        setContentView(R.layout.activity_add_word)\n        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->\n            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())\n            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)\n            insets\n        }\n    }\n\n    fun addWord(view : View){\n        val word = findViewById<EditText>(R.id.word_edit_text).text.toString()\n        val def = findViewById<EditText>(R.id.def_edit_text).text.toString()\n\n        // error checking\n\n        val myIntent = Intent()\n        myIntent.putExtra(\"word\", word)\n        myIntent.putExtra(\"def\", def)\n        setResult(RESULT_OK, myIntent)\n        finish()\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../java/com/example/mobileappdev2025/AddWordActivity.kt b/../java/com/example/mobileappdev2025/AddWordActivity.kt
+--- a/../java/com/example/mobileappdev2025/AddWordActivity.kt	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/../java/com/example/mobileappdev2025/AddWordActivity.kt	(date 1742222639542)
+@@ -4,33 +4,33 @@
+ import android.os.Bundle
+ import android.view.View
+ import android.widget.EditText
+-import androidx.activity.enableEdgeToEdge
+ import androidx.appcompat.app.AppCompatActivity
+-import androidx.core.view.ViewCompat
+-import androidx.core.view.WindowInsetsCompat
++import androidx.core.view.WindowCompat
+ 
+ class AddWordActivity : AppCompatActivity() {
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+-        enableEdgeToEdge()
++
++        // Correct way to enable edge-to-edge in AppCompatActivity
++        WindowCompat.setDecorFitsSystemWindows(window, false)
++
+         setContentView(R.layout.activity_add_word)
+-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+-            insets
+-        }
+     }
+ 
+-    fun addWord(view : View){
++    fun addWord(view: View) {
+         val word = findViewById<EditText>(R.id.word_edit_text).text.toString()
+         val def = findViewById<EditText>(R.id.def_edit_text).text.toString()
+ 
+-        // error checking
++        if (word.isBlank() || def.isBlank()) {
++            // Error handling (optional)
++            return
++        }
+ 
+-        val myIntent = Intent()
+-        myIntent.putExtra("word", word)
+-        myIntent.putExtra("def", def)
++        val myIntent = Intent().apply {
++            putExtra("word", word)
++            putExtra("def", def)
++        }
+         setResult(RESULT_OK, myIntent)
+         finish()
+     }
+-}
+\ No newline at end of file
++}
+Index: ../java/com/example/mobileappdev2025/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mobileappdev2025\n\nimport android.content.Intent\nimport android.os.Bundle\nimport android.util.Log\nimport android.view.View\nimport android.widget.ArrayAdapter\nimport android.widget.Button\nimport android.widget.ImageView\nimport android.widget.ListView\nimport android.widget.TextView\nimport androidx.activity.enableEdgeToEdge\nimport androidx.appcompat.app.AppCompatActivity\nimport androidx.core.view.ViewCompat\nimport androidx.core.view.WindowInsetsCompat\nimport java.io.File\nimport java.io.FileInputStream\nimport java.util.Random\nimport java.util.Scanner\n\ndata class WordDefinition(val word: String, val definition: String);\n\nclass MainActivity : AppCompatActivity() {\n    private val ADD_WORD_CODE = 1234; // 1-65535\n    private lateinit var myAdapter : ArrayAdapter<String>; // connect from data to gui\n    private var dataDefList = ArrayList<String>(); // data\n    private var wordDefinition = mutableListOf<WordDefinition>();\n    private var score : Int = 1;\n    private var totalCorrect : Int = 2;\n    private var totalWrong : Int = 3;\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        enableEdgeToEdge()\n        setContentView(R.layout.activity_main)\n        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->\n            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())\n            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)\n            insets\n        }\n\n        loadWordsFromDisk()\n\n        pickNewWordAndLoadDataList();\n        setupList();\n\n        val defList = findViewById<ListView>(R.id.dynamic_def_list);\n        defList.setOnItemClickListener { _, _, index, _ ->\n            pickNewWordAndLoadDataList();\n            myAdapter.notifyDataSetChanged();\n        };\n    }\n\n\n    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {\n        super.onActivityResult(requestCode, resultCode, data)\n\n        if (requestCode == ADD_WORD_CODE && resultCode == RESULT_OK && data != null){\n            val word = data.getStringExtra(\"word\")?:\"\"\n            val def = data.getStringExtra(\"def\")?:\"\"\n\n            Log.d(\"MAD\", word)\n            Log.d(\"MAD\", def)\n\n            if ( word == \"\" || def == \"\")\n                return\n\n            wordDefinition.add(WordDefinition(word, def))\n\n            pickNewWordAndLoadDataList()\n            myAdapter.notifyDataSetChanged()\n        }\n    }\n\n    private fun loadWordsFromDisk()\n    {\n        // user data\n        val file = File(applicationContext.filesDir, \"user_data.csv\")\n\n        if (file.exists()) {\n            val readResult = FileInputStream(file)\n            val scanner = Scanner(readResult)\n\n            while(scanner.hasNextLine()){\n                val line = scanner.nextLine()\n                val wd = line.split(\"|\")\n                wordDefinition.add(WordDefinition(wd[0], wd[1]))\n            }\n        } else { // default data\n\n            file.createNewFile()\n\n            val reader = Scanner(resources.openRawResource(R.raw.default_words))\n            while(reader.hasNextLine()){\n                val line = reader.nextLine()\n                val wd = line.split(\"|\")\n                wordDefinition.add(WordDefinition(wd[0], wd[1]))\n                file.appendText(\"${wd[0]}|${wd[1]}\\n\")\n            }\n        }\n    }\n\n    private fun pickNewWordAndLoadDataList()\n    {\n        wordDefinition.shuffle();\n\n        dataDefList.clear();\n\n        for(wd in wordDefinition){\n            dataDefList.add(wd.definition);\n        }\n\n        findViewById<TextView>(R.id.word).text = wordDefinition[0].word;\n\n        dataDefList.shuffle();\n    }\n\n    private fun setupList()\n    {\n        myAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataDefList);\n\n        // connect to list\n        val defList = findViewById<ListView>(R.id.dynamic_def_list);\n        defList.adapter = myAdapter;\n    }\n\n    fun openStats(view : View)\n    {\n        var myIntent = Intent(this, StatsActivity::class.java);\n        myIntent.putExtra(\"score\", score.toString());\n        myIntent.putExtra(\"totalCorrect\", totalCorrect.toString());\n        myIntent.putExtra(\"totalWrong\", totalWrong.toString());\n        startActivity(myIntent)\n    }\n\n    fun openAddWord(view : View)\n    {\n        var myIntent = Intent(this, AddWordActivity::class.java);\n        startActivityForResult(myIntent, ADD_WORD_CODE)\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../java/com/example/mobileappdev2025/MainActivity.kt b/../java/com/example/mobileappdev2025/MainActivity.kt
+--- a/../java/com/example/mobileappdev2025/MainActivity.kt	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/../java/com/example/mobileappdev2025/MainActivity.kt	(date 1742224881802)
+@@ -1,141 +1,114 @@
+-package com.example.mobileappdev2025
++package com.example.vocabgame
+ 
+-import android.content.Intent
+ import android.os.Bundle
+-import android.util.Log
+ import android.view.View
+-import android.widget.ArrayAdapter
+ import android.widget.Button
+-import android.widget.ImageView
+ import android.widget.ListView
+ import android.widget.TextView
+-import androidx.activity.enableEdgeToEdge
+ import androidx.appcompat.app.AppCompatActivity
+-import androidx.core.view.ViewCompat
+-import androidx.core.view.WindowInsetsCompat
++import com.google.gson.Gson
++import com.google.gson.reflect.TypeToken
+ import java.io.File
+-import java.io.FileInputStream
+-import java.util.Random
+-import java.util.Scanner
+-
+-data class WordDefinition(val word: String, val definition: String);
+ 
+ class MainActivity : AppCompatActivity() {
+-    private val ADD_WORD_CODE = 1234; // 1-65535
+-    private lateinit var myAdapter : ArrayAdapter<String>; // connect from data to gui
+-    private var dataDefList = ArrayList<String>(); // data
+-    private var wordDefinition = mutableListOf<WordDefinition>();
+-    private var score : Int = 1;
+-    private var totalCorrect : Int = 2;
+-    private var totalWrong : Int = 3;
++    private var score = 0
++    private var streak = 0
++    private var longestStreak = 0
++    private val userStatsFile = "user_stats.json"
++    private val userDataFile = "user_data.json"
++
++    private lateinit var wordTextView: TextView
++    private lateinit var definitionsListView: ListView
++    private lateinit var scoreTextView: TextView
++    private lateinit var streakTextView: TextView
++    private lateinit var statsButton: Button
++    private lateinit var addWordButton: Button
++
++    private val wordList = listOf("abundant", "benevolent", "candid", "diligent")
++    private val definitionsMap = mapOf(
++        "abundant" to listOf("Plentiful", "Existing in large amounts", "Ample", "More than enough"),
++        "benevolent" to listOf("Kind", "Well-meaning", "Generous", "Charitable"),
++        "candid" to listOf("Honest", "Truthful", "Straightforward", "Frank"),
++        "diligent" to listOf("Hardworking", "Persistent", "Industrious", "Thorough")
++    )
++
++    private var currentWord = ""
++    private lateinit var userData: MutableMap<String, Int>
+ 
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+-        enableEdgeToEdge()
+         setContentView(R.layout.activity_main)
+-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+-            insets
+-        }
+ 
+-        loadWordsFromDisk()
++        wordTextView = findViewById(R.id.word)
++        definitionsListView = findViewById(R.id.dynamic_def_list)
++        scoreTextView = findViewById(R.id.scoreTextView)
++        streakTextView = findViewById(R.id.streakTextView)
++        statsButton = findViewById(R.id.stats_button)
++        addWordButton = findViewById(R.id.add_word_button)
+ 
+-        pickNewWordAndLoadDataList();
+-        setupList();
++        loadStats()
++        loadUserData()
++        updateUI()
++        showNextWord()
+ 
+-        val defList = findViewById<ListView>(R.id.dynamic_def_list);
+-        defList.setOnItemClickListener { _, _, index, _ ->
+-            pickNewWordAndLoadDataList();
+-            myAdapter.notifyDataSetChanged();
+-        };
++        statsButton.setOnClickListener { openStats(it) }
++        addWordButton.setOnClickListener { openAddWord(it) }
+     }
+ 
+-
+-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+-        super.onActivityResult(requestCode, resultCode, data)
+-
+-        if (requestCode == ADD_WORD_CODE && resultCode == RESULT_OK && data != null){
+-            val word = data.getStringExtra("word")?:""
+-            val def = data.getStringExtra("def")?:""
+-
+-            Log.d("MAD", word)
+-            Log.d("MAD", def)
+-
+-            if ( word == "" || def == "")
+-                return
+-
+-            wordDefinition.add(WordDefinition(word, def))
+-
+-            pickNewWordAndLoadDataList()
+-            myAdapter.notifyDataSetChanged()
+-        }
++    private fun updateUI() {
++        scoreTextView.text = "Score: $score"
++        streakTextView.text = "Streak: $streak"
+     }
+ 
+-    private fun loadWordsFromDisk()
+-    {
+-        // user data
+-        val file = File(applicationContext.filesDir, "user_data.csv")
+-
++    private fun loadStats() {
++        val file = File(filesDir, userStatsFile)
+         if (file.exists()) {
+-            val readResult = FileInputStream(file)
+-            val scanner = Scanner(readResult)
++            val stats = Gson().fromJson(file.readText(), UserStats::class.java)
++            score = stats.score
++            streak = stats.streak
++            longestStreak = stats.longestStreak
++        }
++    }
+ 
+-            while(scanner.hasNextLine()){
+-                val line = scanner.nextLine()
+-                val wd = line.split("|")
+-                wordDefinition.add(WordDefinition(wd[0], wd[1]))
+-            }
+-        } else { // default data
++    private fun saveStats() {
++        val stats = UserStats(score, streak, longestStreak)
++        File(filesDir, userStatsFile).writeText(Gson().toJson(stats))
++    }
+ 
+-            file.createNewFile()
+-
+-            val reader = Scanner(resources.openRawResource(R.raw.default_words))
+-            while(reader.hasNextLine()){
+-                val line = reader.nextLine()
+-                val wd = line.split("|")
+-                wordDefinition.add(WordDefinition(wd[0], wd[1]))
+-                file.appendText("${wd[0]}|${wd[1]}\n")
+-            }
+-        }
++    private fun loadUserData() {
++        val file = File(filesDir, userDataFile)
++        userData = if (file.exists()) {
++            val type = object : TypeToken<MutableMap<String, Int>>() {}.type
++            Gson().fromJson(file.readText(), type)
++        } else {
++            mutableMapOf()
++        }
++    }
++
++    private fun saveUserData() {
++        File(filesDir, userDataFile).writeText(Gson().toJson(userData))
+     }
+ 
+-    private fun pickNewWordAndLoadDataList()
+-    {
+-        wordDefinition.shuffle();
++    private fun showNextWord() {
++        val filteredWords = wordList.filter { (userData[it] ?: 0) < 2 }
++        currentWord = filteredWords.randomOrNull() ?: wordList.random() // Pick a word
+ 
+-        dataDefList.clear();
++        wordTextView.text = currentWord
++    }
+ 
+-        for(wd in wordDefinition){
+-            dataDefList.add(wd.definition);
+-        }
++    fun openStats(view: View) {
++        // TODO: Implement Stats Screen Activity
++    }
+ 
+-        findViewById<TextView>(R.id.word).text = wordDefinition[0].word;
+-
+-        dataDefList.shuffle();
++    fun openAddWord(view: View) {
++        // TODO: Implement Add Word Functionality
+     }
+ 
+-    private fun setupList()
+-    {
+-        myAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataDefList);
+-
+-        // connect to list
+-        val defList = findViewById<ListView>(R.id.dynamic_def_list);
+-        defList.adapter = myAdapter;
++    override fun onDestroy() {
++        saveStats()
++        saveUserData()
++        super.onDestroy()
+     }
+-
+-    fun openStats(view : View)
+-    {
+-        var myIntent = Intent(this, StatsActivity::class.java);
+-        myIntent.putExtra("score", score.toString());
+-        myIntent.putExtra("totalCorrect", totalCorrect.toString());
+-        myIntent.putExtra("totalWrong", totalWrong.toString());
+-        startActivity(myIntent)
+-    }
++}
+ 
+-    fun openAddWord(view : View)
+-    {
+-        var myIntent = Intent(this, AddWordActivity::class.java);
+-        startActivityForResult(myIntent, ADD_WORD_CODE)
+-    }
+-}
+\ No newline at end of file
++data class UserStats(var score: Int, var streak: Int, var longestStreak: Int)
+Index: ../.idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../.idea/workspace.xml b/../.idea/workspace.xml
+new file mode 100644
+--- /dev/null	(date 1742220358501)
++++ b/../.idea/workspace.xml	(date 1742220358501)
+@@ -0,0 +1,64 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="AutoImportSettings">
++    <option name="autoReloadType" value="NONE" />
++  </component>
++  <component name="ChangeListManager">
++    <list default="true" id="fb44784f-4862-43b6-835f-2ec9149879a3" name="Changes" comment="">
++      <change beforePath="$PROJECT_DIR$/java/com/example/mobileappdev2025/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/java/com/example/mobileappdev2025/MainActivity.kt" afterDir="false" />
++    </list>
++    <option name="SHOW_DIALOG" value="false" />
++    <option name="HIGHLIGHT_CONFLICTS" value="true" />
++    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
++    <option name="LAST_RESOLUTION" value="IGNORE" />
++  </component>
++  <component name="ClangdSettings">
++    <option name="formatViaClangd" value="false" />
++  </component>
++  <component name="Git.Settings">
++    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
++  </component>
++  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
++  "lastFilter": {
++    "state": "OPEN",
++    "assignee": "majahholliday"
++  }
++}]]></component>
++  <component name="GithubPullRequestsUISettings"><![CDATA[{
++  "selectedUrlAndAccountId": {
++    "url": "https://github.com/CNalls/LearningGameMobileApp2025.git",
++    "accountId": "73939d36-c307-47ac-8109-38ebe4c6264a"
++  }
++}]]></component>
++  <component name="ProjectColorInfo"><![CDATA[{
++  "associatedIndex": 4
++}]]></component>
++  <component name="ProjectId" id="2uRndPxR2cfwJogQnhtBQGVL66X" />
++  <component name="ProjectViewState">
++    <option name="hideEmptyMiddlePackages" value="true" />
++    <option name="showLibraryContents" value="true" />
++  </component>
++  <component name="PropertiesComponent"><![CDATA[{
++  "keyToString": {
++    "RunOnceActivity.ShowReadmeOnStart": "true",
++    "RunOnceActivity.cidr.known.project.marker": "true",
++    "RunOnceActivity.readMode.enableVisualFormatting": "true",
++    "cf.first.check.clang-format": "false",
++    "cidr.known.project.marker": "true",
++    "git-widget-placeholder": "main",
++    "kotlin-language-version-configured": "true",
++    "last_opened_file_path": "/Users/majahholliday/LearningGameMobileApp2025/app/src/main"
++  }
++}]]></component>
++  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
++  <component name="TaskManager">
++    <task active="true" id="Default" summary="Default task">
++      <changelist id="fb44784f-4862-43b6-835f-2ec9149879a3" name="Changes" comment="" />
++      <created>1742220340868</created>
++      <option name="number" value="Default" />
++      <option name="presentableId" value="Default" />
++      <updated>1742220340868</updated>
++    </task>
++    <servers />
++  </component>
++</project>
+\ No newline at end of file
+Index: ../.idea/caches/deviceStreaming.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../.idea/caches/deviceStreaming.xml b/../.idea/caches/deviceStreaming.xml
+new file mode 100644
+--- /dev/null	(date 1742220358521)
++++ b/../.idea/caches/deviceStreaming.xml	(date 1742220358521)
+@@ -0,0 +1,607 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="DeviceStreaming">
++    <option name="deviceSelectionList">
++      <list>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="27" />
++          <option name="brand" value="DOCOMO" />
++          <option name="codename" value="F01L" />
++          <option name="id" value="F01L" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="FUJITSU" />
++          <option name="name" value="F-01L" />
++          <option name="screenDensity" value="360" />
++          <option name="screenX" value="720" />
++          <option name="screenY" value="1280" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="OnePlus" />
++          <option name="codename" value="OP5552L1" />
++          <option name="id" value="OP5552L1" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="OnePlus" />
++          <option name="name" value="CPH2415" />
++          <option name="screenDensity" value="480" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2412" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="OPPO" />
++          <option name="codename" value="OP573DL1" />
++          <option name="id" value="OP573DL1" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="OPPO" />
++          <option name="name" value="CPH2557" />
++          <option name="screenDensity" value="480" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="28" />
++          <option name="brand" value="DOCOMO" />
++          <option name="codename" value="SH-01L" />
++          <option name="id" value="SH-01L" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="SHARP" />
++          <option name="name" value="AQUOS sense2 SH-01L" />
++          <option name="screenDensity" value="480" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2160" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="Lenovo" />
++          <option name="codename" value="TB370FU" />
++          <option name="formFactor" value="Tablet" />
++          <option name="id" value="TB370FU" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Lenovo" />
++          <option name="name" value="Tab P12" />
++          <option name="screenDensity" value="340" />
++          <option name="screenX" value="1840" />
++          <option name="screenY" value="2944" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="a15" />
++          <option name="id" value="a15" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="A15" />
++          <option name="screenDensity" value="450" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2340" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="a35x" />
++          <option name="id" value="a35x" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="A35" />
++          <option name="screenDensity" value="450" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2340" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="31" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="a51" />
++          <option name="id" value="a51" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy A51" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="google" />
++          <option name="codename" value="akita" />
++          <option name="id" value="akita" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 8a" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="motorola" />
++          <option name="codename" value="arcfox" />
++          <option name="id" value="arcfox" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Motorola" />
++          <option name="name" value="razr plus 2024" />
++          <option name="screenDensity" value="360" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="1272" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="motorola" />
++          <option name="codename" value="austin" />
++          <option name="id" value="austin" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Motorola" />
++          <option name="name" value="moto g 5G (2022)" />
++          <option name="screenDensity" value="280" />
++          <option name="screenX" value="720" />
++          <option name="screenY" value="1600" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="b0q" />
++          <option name="id" value="b0q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy S22 Ultra" />
++          <option name="screenDensity" value="600" />
++          <option name="screenX" value="1440" />
++          <option name="screenY" value="3088" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="32" />
++          <option name="brand" value="google" />
++          <option name="codename" value="bluejay" />
++          <option name="id" value="bluejay" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 6a" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="google" />
++          <option name="codename" value="caiman" />
++          <option name="id" value="caiman" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 9 Pro" />
++          <option name="screenDensity" value="360" />
++          <option name="screenX" value="960" />
++          <option name="screenY" value="2142" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="google" />
++          <option name="codename" value="comet" />
++          <option name="default" value="true" />
++          <option name="id" value="comet" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 9 Pro Fold" />
++          <option name="screenDensity" value="390" />
++          <option name="screenX" value="2076" />
++          <option name="screenY" value="2152" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="29" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="crownqlteue" />
++          <option name="id" value="crownqlteue" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy Note9" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="2220" />
++          <option name="screenY" value="1080" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="dm2q" />
++          <option name="id" value="dm2q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="S23 Plus" />
++          <option name="screenDensity" value="450" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2340" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="dm3q" />
++          <option name="id" value="dm3q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy S23 Ultra" />
++          <option name="screenDensity" value="600" />
++          <option name="screenX" value="1440" />
++          <option name="screenY" value="3088" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="e1q" />
++          <option name="default" value="true" />
++          <option name="id" value="e1q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy S24" />
++          <option name="screenDensity" value="480" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2340" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="e3q" />
++          <option name="id" value="e3q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy S24 Ultra" />
++          <option name="screenDensity" value="450" />
++          <option name="screenX" value="1440" />
++          <option name="screenY" value="3120" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="google" />
++          <option name="codename" value="eos" />
++          <option name="id" value="eos" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Eos" />
++          <option name="screenDensity" value="320" />
++          <option name="screenX" value="384" />
++          <option name="screenY" value="384" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="google" />
++          <option name="codename" value="felix" />
++          <option name="id" value="felix" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel Fold" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="2208" />
++          <option name="screenY" value="1840" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="google" />
++          <option name="codename" value="felix" />
++          <option name="id" value="felix" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel Fold" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="2208" />
++          <option name="screenY" value="1840" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="google" />
++          <option name="codename" value="felix_camera" />
++          <option name="id" value="felix_camera" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel Fold (Camera-enabled)" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="2208" />
++          <option name="screenY" value="1840" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="motorola" />
++          <option name="codename" value="fogona" />
++          <option name="id" value="fogona" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Motorola" />
++          <option name="name" value="moto g play - 2024" />
++          <option name="screenDensity" value="280" />
++          <option name="screenX" value="720" />
++          <option name="screenY" value="1600" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="g0q" />
++          <option name="id" value="g0q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="SM-S906U1" />
++          <option name="screenDensity" value="450" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2340" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="gta9pwifi" />
++          <option name="id" value="gta9pwifi" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="SM-X210" />
++          <option name="screenDensity" value="240" />
++          <option name="screenX" value="1200" />
++          <option name="screenY" value="1920" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="gts7xllite" />
++          <option name="id" value="gts7xllite" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="SM-T738U" />
++          <option name="screenDensity" value="340" />
++          <option name="screenX" value="1600" />
++          <option name="screenY" value="2560" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="gts8uwifi" />
++          <option name="formFactor" value="Tablet" />
++          <option name="id" value="gts8uwifi" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy Tab S8 Ultra" />
++          <option name="screenDensity" value="320" />
++          <option name="screenX" value="1848" />
++          <option name="screenY" value="2960" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="gts8wifi" />
++          <option name="formFactor" value="Tablet" />
++          <option name="id" value="gts8wifi" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy Tab S8" />
++          <option name="screenDensity" value="274" />
++          <option name="screenX" value="1600" />
++          <option name="screenY" value="2560" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="gts9fe" />
++          <option name="id" value="gts9fe" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy Tab S9 FE 5G" />
++          <option name="screenDensity" value="280" />
++          <option name="screenX" value="1440" />
++          <option name="screenY" value="2304" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="google" />
++          <option name="codename" value="husky" />
++          <option name="id" value="husky" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 8 Pro" />
++          <option name="screenDensity" value="390" />
++          <option name="screenX" value="1008" />
++          <option name="screenY" value="2244" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="30" />
++          <option name="brand" value="motorola" />
++          <option name="codename" value="java" />
++          <option name="id" value="java" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Motorola" />
++          <option name="name" value="G20" />
++          <option name="screenDensity" value="280" />
++          <option name="screenX" value="720" />
++          <option name="screenY" value="1600" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="google" />
++          <option name="codename" value="komodo" />
++          <option name="id" value="komodo" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 9 Pro XL" />
++          <option name="screenDensity" value="360" />
++          <option name="screenX" value="1008" />
++          <option name="screenY" value="2244" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="google" />
++          <option name="codename" value="lynx" />
++          <option name="id" value="lynx" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 7a" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="motorola" />
++          <option name="codename" value="maui" />
++          <option name="id" value="maui" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Motorola" />
++          <option name="name" value="moto g play - 2023" />
++          <option name="screenDensity" value="280" />
++          <option name="screenX" value="720" />
++          <option name="screenY" value="1600" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="o1q" />
++          <option name="id" value="o1q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy S21" />
++          <option name="screenDensity" value="421" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="31" />
++          <option name="brand" value="google" />
++          <option name="codename" value="oriole" />
++          <option name="id" value="oriole" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 6" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="google" />
++          <option name="codename" value="panther" />
++          <option name="id" value="panther" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 7" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="q5q" />
++          <option name="id" value="q5q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy Z Fold5" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1812" />
++          <option name="screenY" value="2176" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="q6q" />
++          <option name="id" value="q6q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy Z Fold6" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1856" />
++          <option name="screenY" value="2160" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="30" />
++          <option name="brand" value="google" />
++          <option name="codename" value="r11" />
++          <option name="formFactor" value="Wear OS" />
++          <option name="id" value="r11" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel Watch" />
++          <option name="screenDensity" value="320" />
++          <option name="screenX" value="384" />
++          <option name="screenY" value="384" />
++          <option name="type" value="WEAR_OS" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="r11q" />
++          <option name="id" value="r11q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="SM-S711U" />
++          <option name="screenDensity" value="450" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2340" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="30" />
++          <option name="brand" value="google" />
++          <option name="codename" value="redfin" />
++          <option name="id" value="redfin" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 5" />
++          <option name="screenDensity" value="440" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2340" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="google" />
++          <option name="codename" value="shiba" />
++          <option name="id" value="shiba" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 8" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="samsung" />
++          <option name="codename" value="t2q" />
++          <option name="id" value="t2q" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Samsung" />
++          <option name="name" value="Galaxy S21 Plus" />
++          <option name="screenDensity" value="394" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2400" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="33" />
++          <option name="brand" value="google" />
++          <option name="codename" value="tangorpro" />
++          <option name="formFactor" value="Tablet" />
++          <option name="id" value="tangorpro" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel Tablet" />
++          <option name="screenDensity" value="320" />
++          <option name="screenX" value="1600" />
++          <option name="screenY" value="2560" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="34" />
++          <option name="brand" value="google" />
++          <option name="codename" value="tokay" />
++          <option name="default" value="true" />
++          <option name="id" value="tokay" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 9" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2424" />
++        </PersistentDeviceSelectionData>
++        <PersistentDeviceSelectionData>
++          <option name="api" value="35" />
++          <option name="brand" value="google" />
++          <option name="codename" value="tokay" />
++          <option name="default" value="true" />
++          <option name="id" value="tokay" />
++          <option name="labId" value="google" />
++          <option name="manufacturer" value="Google" />
++          <option name="name" value="Pixel 9" />
++          <option name="screenDensity" value="420" />
++          <option name="screenX" value="1080" />
++          <option name="screenY" value="2424" />
++        </PersistentDeviceSelectionData>
++      </list>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: ../java/com/example/mobileappdev2025/StatsActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.mobileappdev2025\n\nimport android.os.Bundle\nimport android.widget.TextView\nimport androidx.activity.enableEdgeToEdge\nimport androidx.appcompat.app.AppCompatActivity\nimport androidx.core.view.ViewCompat\nimport androidx.core.view.WindowInsetsCompat\n\nclass StatsActivity : AppCompatActivity() {\n    override fun onCreate(savedInstanceState: Bundle?) {\n        super.onCreate(savedInstanceState)\n        enableEdgeToEdge()\n        setContentView(R.layout.activity_stats)\n        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->\n            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())\n            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)\n            insets\n        }\n\n        val score = intent.getStringExtra(\"score\")?:\"SCORE NOT FOUND\";\n        val totalCorrect = intent.getStringExtra(\"totalCorrect\")?:\"TOTAL CORRECT NOT FOUND\";\n        val totalWrong = intent.getStringExtra(\"totalWrong\")?:\"TOTAL WRONG NOT FOUND\";\n\n        findViewById<TextView>(R.id.score_text).text = \"Score : \" + score;\n        findViewById<TextView>(R.id.correct_text).text = \"Correct Count : \" + totalCorrect;\n        findViewById<TextView>(R.id.wrong_text).text = \"Incorrect Count : \" + totalWrong;\n\n        // finish(); // used the pop the activity stack\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../java/com/example/mobileappdev2025/StatsActivity.kt b/../java/com/example/mobileappdev2025/StatsActivity.kt
+--- a/../java/com/example/mobileappdev2025/StatsActivity.kt	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/../java/com/example/mobileappdev2025/StatsActivity.kt	(date 1742226509876)
+@@ -2,7 +2,6 @@
+ 
+ import android.os.Bundle
+ import android.widget.TextView
+-import androidx.activity.enableEdgeToEdge
+ import androidx.appcompat.app.AppCompatActivity
+ import androidx.core.view.ViewCompat
+ import androidx.core.view.WindowInsetsCompat
+@@ -10,22 +9,27 @@
+ class StatsActivity : AppCompatActivity() {
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+-        enableEdgeToEdge()
+         setContentView(R.layout.activity_stats)
++
+         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+             insets
+         }
+ 
+-        val score = intent.getStringExtra("score")?:"SCORE NOT FOUND";
+-        val totalCorrect = intent.getStringExtra("totalCorrect")?:"TOTAL CORRECT NOT FOUND";
+-        val totalWrong = intent.getStringExtra("totalWrong")?:"TOTAL WRONG NOT FOUND";
++        // Use getIntExtra() for numbers
++        val score = intent.getIntExtra("score", -1)
++        val totalCorrect = intent.getIntExtra("totalCorrect", -1)
++        val totalWrong = intent.getIntExtra("totalWrong", -1)
+ 
+-        findViewById<TextView>(R.id.score_text).text = "Score : " + score;
+-        findViewById<TextView>(R.id.correct_text).text = "Correct Count : " + totalCorrect;
+-        findViewById<TextView>(R.id.wrong_text).text = "Incorrect Count : " + totalWrong;
++        // Store findViewById() references for better performance
++        val scoreText = findViewById<TextView>(R.id.score_text)
++        val correctText = findViewById<TextView>(R.id.correct_text)
++        val wrongText = findViewById<TextView>(R.id.wrong_text)
+ 
+-        // finish(); // used the pop the activity stack
++        // Update text
++        scoreText.text = getString(R.string.score_text, score)
++        correctText.text = getString(R.string.correct_text, totalCorrect)
++        wrongText.text = getString(R.string.wrong_text, totalWrong)
+     }
+-}
+\ No newline at end of file
++}
+Index: ../.idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../.idea/modules.xml b/../.idea/modules.xml
+new file mode 100644
+--- /dev/null	(date 1742220358466)
++++ b/../.idea/modules.xml	(date 1742220358466)
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectModuleManager">
++    <modules>
++      <module fileurl="file://$PROJECT_DIR$/main.iml" filepath="$PROJECT_DIR$/main.iml" />
++    </modules>
++  </component>
++</project>
+\ No newline at end of file
+Index: layout/activity_main.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\n    xmlns:tools=\"http://schemas.android.com/tools\"\n    android:id=\"@+id/main\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"match_parent\"\n    tools:context=\".MainActivity\">\n\n    <TextView\n        android:id=\"@+id/word\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_marginTop=\"14dp\"\n        android:text=\"TextView\"\n        app:layout_constraintEnd_toEndOf=\"parent\"\n        app:layout_constraintStart_toStartOf=\"parent\"\n        app:layout_constraintTop_toTopOf=\"parent\" />\n\n    <ListView\n        android:id=\"@+id/dynamic_def_list\"\n        android:layout_width=\"409dp\"\n        android:layout_height=\"640dp\"\n        android:layout_marginTop=\"1dp\"\n        app:layout_constraintBottom_toTopOf=\"@+id/stats_button\"\n        app:layout_constraintStart_toStartOf=\"parent\"\n        app:layout_constraintTop_toBottomOf=\"@+id/word\" />\n\n    <Button\n        android:id=\"@+id/stats_button\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_marginStart=\"36dp\"\n        android:onClick=\"openStats\"\n        android:text=\"@string/stats\"\n        app:layout_constraintBottom_toBottomOf=\"parent\"\n        app:layout_constraintStart_toStartOf=\"parent\" />\n\n    <Button\n        android:id=\"@+id/add_word_button\"\n        android:layout_width=\"wrap_content\"\n        android:layout_height=\"wrap_content\"\n        android:layout_marginEnd=\"36dp\"\n        android:onClick=\"openAddWord\"\n        android:text=\"Add Word\"\n        app:layout_constraintBottom_toBottomOf=\"parent\"\n        app:layout_constraintEnd_toEndOf=\"parent\" />\n\n</androidx.constraintlayout.widget.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/layout/activity_main.xml b/layout/activity_main.xml
+--- a/layout/activity_main.xml	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/layout/activity_main.xml	(date 1742225401581)
+@@ -12,27 +12,28 @@
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_marginTop="14dp"
+-        android:text="TextView"
++        android:text="Word"
++        android:textSize="24sp"
++        android:textStyle="bold"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintTop_toTopOf="parent" />
+ 
+     <ListView
+         android:id="@+id/dynamic_def_list"
+-        android:layout_width="409dp"
+-        android:layout_height="640dp"
+-        android:layout_marginTop="1dp"
+-        app:layout_constraintBottom_toTopOf="@+id/stats_button"
++        android:layout_width="0dp"
++        android:layout_height="400dp"
++        app:layout_constraintTop_toBottomOf="@+id/word"
+         app:layout_constraintStart_toStartOf="parent"
+-        app:layout_constraintTop_toBottomOf="@+id/word" />
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintBottom_toTopOf="@+id/stats_button" />
+ 
+     <Button
+         android:id="@+id/stats_button"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
++        android:text="Stats"
+         android:layout_marginStart="36dp"
+-        android:onClick="openStats"
+-        android:text="@string/stats"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintStart_toStartOf="parent" />
+ 
+@@ -40,10 +41,9 @@
+         android:id="@+id/add_word_button"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
++        android:text="Add Word"
+         android:layout_marginEnd="36dp"
+-        android:onClick="openAddWord"
+-        android:text="Add Word"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintEnd_toEndOf="parent" />
+ 
+-</androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
++</androidx.constraintlayout.widget.ConstraintLayout>
+Index: values/colors.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>\n    <color name=\"black\">#FF000000</color>\n    <color name=\"white\">#FFFFFFFF</color>\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/values/colors.xml b/values/colors.xml
+--- a/values/colors.xml	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/values/colors.xml	(date 1742221816090)
+@@ -1,5 +1,8 @@
+-<?xml version="1.0" encoding="utf-8"?>
+ <resources>
+-    <color name="black">#FF000000</color>
+-    <color name="white">#FFFFFFFF</color>
+-</resources>
+\ No newline at end of file
++    <color name="purple_500">#6200EE</color>
++    <color name="purple_700">#3700B3</color>
++    <color name="teal_200">#03DAC5</color>
++    <color name="teal_700">#018786</color>
++    <color name="white">#FFFFFF</color>
++    <color name="black">#000000</color>
++</resources>
+Index: ../.idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../.idea/misc.xml b/../.idea/misc.xml
+new file mode 100644
+--- /dev/null	(date 1742220358511)
++++ b/../.idea/misc.xml	(date 1742220358511)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="jbr-21" project-jdk-type="JavaSDK">
++    <output url="file://$PROJECT_DIR$/out" />
++  </component>
++</project>
+\ No newline at end of file
+Index: ../.idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../.idea/vcs.xml b/../.idea/vcs.xml
+new file mode 100644
+--- /dev/null	(date 1742220358679)
++++ b/../.idea/vcs.xml	(date 1742220358679)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="$PROJECT_DIR$/../../.." vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
+Index: ../../../build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\n    alias(libs.plugins.android.application)\n    alias(libs.plugins.kotlin.android)\n}\n\nandroid {\n    namespace = \"com.example.mobileappdev2025\"\n    compileSdk = 35\n\n    defaultConfig {\n        applicationId = \"com.example.mobileappdev2025\"\n        minSdk = 24\n        targetSdk = 35\n        versionCode = 1\n        versionName = \"1.0\"\n\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\n    }\n\n    buildTypes {\n        release {\n            isMinifyEnabled = false\n            proguardFiles(\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\n                \"proguard-rules.pro\"\n            )\n        }\n    }\n    compileOptions {\n        sourceCompatibility = JavaVersion.VERSION_11\n        targetCompatibility = JavaVersion.VERSION_11\n    }\n    kotlinOptions {\n        jvmTarget = \"11\"\n    }\n}\n\ndependencies {\n\n    implementation(libs.androidx.core.ktx)\n    implementation(libs.androidx.appcompat)\n    implementation(libs.material)\n    implementation(libs.androidx.activity)\n    implementation(libs.androidx.constraintlayout)\n    testImplementation(libs.junit)\n    androidTestImplementation(libs.androidx.junit)\n    androidTestImplementation(libs.androidx.espresso.core)\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../../../build.gradle.kts b/../../../build.gradle.kts
+--- a/../../../build.gradle.kts	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/../../../build.gradle.kts	(date 1742224477002)
+@@ -1,6 +1,6 @@
+ plugins {
+-    alias(libs.plugins.android.application)
+-    alias(libs.plugins.kotlin.android)
++    id("com.android.application")
++    id("org.jetbrains.kotlin.android")
+ }
+ 
+ android {
+@@ -36,13 +36,15 @@
+ }
+ 
+ dependencies {
++    implementation("androidx.core:core-ktx:1.12.0")
++    implementation("androidx.appcompat:appcompat:1.6.1")
++    implementation("com.google.android.material:material:1.9.0")
++    implementation("androidx.activity:activity-ktx:1.7.2")
++    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
++    implementation("com.google.code.gson:gson:2.10.1") // ✅ Added Gson
+ 
+-    implementation(libs.androidx.core.ktx)
+-    implementation(libs.androidx.appcompat)
+-    implementation(libs.material)
+-    implementation(libs.androidx.activity)
+-    implementation(libs.androidx.constraintlayout)
+-    testImplementation(libs.junit)
+-    androidTestImplementation(libs.androidx.junit)
+-    androidTestImplementation(libs.androidx.espresso.core)
+-}
+\ No newline at end of file
++    testImplementation("junit:junit:4.13.2")
++    androidTestImplementation("androidx.test.ext:junit:1.1.5")
++    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
++}
++
+Index: values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources>\n    <string name=\"app_name\">MobileAppDev2025</string>\n    <string name=\"stats\">Stats</string>\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/values/strings.xml b/values/strings.xml
+--- a/values/strings.xml	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/values/strings.xml	(date 1742224931579)
+@@ -1,4 +1,4 @@
+ <resources>
+-    <string name="app_name">MobileAppDev2025</string>
++    <string name="app_name">Vocab Game</string>
+     <string name="stats">Stats</string>
+-</resources>
+\ No newline at end of file
++</resources>
+Index: ../../../../gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#Mon Feb 03 09:04:14 CST 2025\ndistributionBase=GRADLE_USER_HOME\ndistributionPath=wrapper/dists\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-8.10.2-bin.zip\nzipStoreBase=GRADLE_USER_HOME\nzipStorePath=wrapper/dists\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/../../../../gradle/wrapper/gradle-wrapper.properties b/../../../../gradle/wrapper/gradle-wrapper.properties
+--- a/../../../../gradle/wrapper/gradle-wrapper.properties	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/../../../../gradle/wrapper/gradle-wrapper.properties	(date 1742222400045)
+@@ -1,6 +1,6 @@
+ #Mon Feb 03 09:04:14 CST 2025
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+-distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-8.10.2-all.zip
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+Index: values/themes.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources xmlns:tools=\"http://schemas.android.com/tools\">\n    <!-- Base application theme. -->\n    <style name=\"Base.Theme.MobileAppDev2025\" parent=\"Theme.Material3.DayNight.NoActionBar\">\n        <!-- Customize your light theme here. -->\n        <!-- <item name=\"colorPrimary\">@color/my_light_primary</item> -->\n    </style>\n\n    <style name=\"Theme.MobileAppDev2025\" parent=\"Base.Theme.MobileAppDev2025\" />\n</resources>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/values/themes.xml b/values/themes.xml
+--- a/values/themes.xml	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/values/themes.xml	(date 1742221749394)
+@@ -1,9 +1,23 @@
+ <resources xmlns:tools="http://schemas.android.com/tools">
+-    <!-- Base application theme. -->
+-    <style name="Base.Theme.MobileAppDev2025" parent="Theme.Material3.DayNight.NoActionBar">
+-        <!-- Customize your light theme here. -->
+-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
++    <!-- Light Theme -->
++    <style name="Theme.VocabGame" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
++        <item name="colorPrimary">@color/purple_500</item>
++        <item name="colorPrimaryVariant">@color/purple_700</item>
++        <item name="colorOnPrimary">@color/white</item>
++        <item name="colorSecondary">@color/teal_200</item>
++        <item name="colorSecondaryVariant">@color/teal_700</item>
++        <item name="colorOnSecondary">@color/black</item>
++        <item name="android:windowBackground">@color/white</item>
++        <item name="android:statusBarColor">@color/purple_700</item>
+     </style>
+ 
+-    <style name="Theme.MobileAppDev2025" parent="Base.Theme.MobileAppDev2025" />
+-</resources>
+\ No newline at end of file
++    <!-- Dark Theme (Optional) -->
++    <style name="Theme.VocabGame.Dark" parent="Theme.MaterialComponents.DayNight">
++        <item name="colorPrimary">@color/black</item>
++        <item name="colorPrimaryVariant">@color/black</item>
++        <item name="colorOnPrimary">@color/white</item>
++        <item name="colorSecondary">@color/teal_200</item>
++        <item name="colorOnSecondary">@color/black</item>
++        <item name="android:windowBackground">@color/black</item>
++    </style>
++</resources>
+Index: ../AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    xmlns:tools=\"http://schemas.android.com/tools\">\n\n    <application\n        android:allowBackup=\"true\"\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\n        android:fullBackupContent=\"@xml/backup_rules\"\n        android:icon=\"@mipmap/ic_launcher\"\n        android:label=\"@string/app_name\"\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\n        android:supportsRtl=\"true\"\n        android:theme=\"@style/Theme.MobileAppDev2025\"\n        tools:targetApi=\"31\">\n        <activity\n            android:name=\".AddWordActivity\"\n            android:exported=\"false\" />\n        <activity\n            android:name=\".StatsActivity\"\n            android:exported=\"false\" />\n        <activity\n            android:name=\".MainActivity\"\n            android:exported=\"true\">\n            <intent-filter>\n                <action android:name=\"android.intent.action.MAIN\" />\n\n                <category android:name=\"android.intent.category.LAUNCHER\" />\n            </intent-filter>\n        </activity>\n    </application>\n\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/../AndroidManifest.xml b/../AndroidManifest.xml
+--- a/../AndroidManifest.xml	(revision 1cf697978f61ef157fa719822d974402046ac5dc)
++++ b/../AndroidManifest.xml	(date 1742221638850)
+@@ -1,32 +1,26 @@
+ <?xml version="1.0" encoding="utf-8"?>
+-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+-    xmlns:tools="http://schemas.android.com/tools">
++<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+ 
+     <application
+         android:allowBackup="true"
+-        android:dataExtractionRules="@xml/data_extraction_rules"
+-        android:fullBackupContent="@xml/backup_rules"
+         android:icon="@mipmap/ic_launcher"
+-        android:label="@string/app_name"
++        android:label="Vocab Game"
+         android:roundIcon="@mipmap/ic_launcher_round"
+         android:supportsRtl="true"
+-        android:theme="@style/Theme.MobileAppDev2025"
+-        tools:targetApi="31">
+-        <activity
+-            android:name=".AddWordActivity"
+-            android:exported="false" />
+-        <activity
+-            android:name=".StatsActivity"
+-            android:exported="false" />
+-        <activity
+-            android:name=".MainActivity"
++        android:theme="@style/Theme.VocabGame">
++
++        <!-- Main Activity must be explicitly exported -->
++        <activity android:name=".MainActivity"
+             android:exported="true">
+             <intent-filter>
+                 <action android:name="android.intent.action.MAIN" />
+-
+                 <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
+         </activity>
++
++        <activity android:name=".StatsActivity"
++            android:exported="false" />
++
+     </application>
+ 
+-</manifest>
+\ No newline at end of file
++</manifest>

@@ -8,6 +8,34 @@
     tools:context=".StatsActivity">
 
     <TextView
+        android:id="@+id/longest_streak_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="148dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="154dp"
+        android:layout_marginBottom="411dp"
+        android:text="Longest Streak: 0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/wrong_text" />
+
+    <TextView
+        android:id="@+id/streak_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="178dp"
+        android:layout_marginTop="173dp"
+        android:layout_marginEnd="175dp"
+        android:layout_marginBottom="8dp"
+        android:text="Streak: 0"
+        app:layout_constraintBottom_toTopOf="@+id/score_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
         android:id="@+id/score_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -36,4 +64,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/correct_text" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
